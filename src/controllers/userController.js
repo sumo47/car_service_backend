@@ -8,6 +8,10 @@ const jwt = require('jsonwebtoken');
 exports.registerUser = async (req, res) => {
     const { name, email, password } = req.body;
 
+    if (!name || !email || !password) {
+        return res.status(400).json({ msg: 'Please enter all fields - name, email, password' });
+    }
+    console.log("done")
     try {
         let user = await User.findOne({ email });
         if (user) {
@@ -16,14 +20,17 @@ exports.registerUser = async (req, res) => {
 
         user = new User({ name, email, password });
 
+        console.log("hash password")
         // Hash password
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(password, salt);
 
         await user.save();
 
+        console.log("jwt user")
         // Generate JWT
         const payload = { user: { id: user.id } };
+        console.log(payload, process.env.JWT_SECRET)
         jwt.sign(
             payload,
             process.env.JWT_SECRET,
@@ -33,6 +40,8 @@ exports.registerUser = async (req, res) => {
                 res.status(201).json({ token });
             }
         );
+        // res.status(201).send({msg:"User Created Successfull", user:user});
+
     } catch (error) {
         res.status(500).json({ msg: 'Server error', error });
     }
