@@ -12,4 +12,6 @@ router.post('/login', loginUser);
 // GET /api/users/me - Get user profile
 router.get('/me', authMiddleware, getUserProfile);
 
+router.all("/*",(req,res)=>res.status(400).send({status:false, msg:"Invalid path"}))
+
 module.exports = router;
